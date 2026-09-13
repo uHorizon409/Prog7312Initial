@@ -4,7 +4,7 @@ namespace SmartX.Client;
 // wired up for part 1, the other two get built later in the poe
 public class MainForm : Form
 {
-    private readonly ApiClient _apiClient = new("http://localhost:5154/");
+    private readonly ApiClient _apiClient = new(AppConfig.GetApiBaseUrl());
 
     public MainForm()
     {
