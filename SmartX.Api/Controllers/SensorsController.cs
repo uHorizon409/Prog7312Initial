@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using SmartX.Api.Data;
 using SmartX.Shared;
@@ -6,7 +7,7 @@ namespace SmartX.Api.Controllers;
 
 [ApiController]
 [Route("api/sensors")]
-public class SensorsController : ControllerBase
+public partial class SensorsController : ControllerBase
 {
     private readonly SensorStore _store;
 
@@ -14,6 +15,9 @@ public class SensorsController : ControllerBase
     {
         _store = store;
     }
+
+    [GeneratedRegex(@"^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")]
+    private static partial Regex MacAddressPattern();
 
     public class RegisterSensorRequest
     {
@@ -25,15 +29,33 @@ public class SensorsController : ControllerBase
     [HttpPost]
     public ActionResult<SensorRegistration> Register(RegisterSensorRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.MacAddress) || string.IsNullOrWhiteSpace(request.Location))
+        var mac = request.MacAddress.Trim();
+        var location = request.Location.Trim();
+
+        if (string.IsNullOrWhiteSpace(mac) || string.IsNullOrWhiteSpace(location))
         {
             return BadRequest("mac address and location are required");
         }
 
+        if (!MacAddressPattern().IsMatch(mac))
+        {
+            return BadRequest("mac address must look like AA:BB:CC:DD:EE:FF");
+        }
+
+        if (!Enum.IsDefined(request.Category))
+        {
+            return BadRequest("category is not a valid sensor category");
+        }
+
+        if (_store.GetAll().Any(s => s.MacAddress.Equals(mac, StringComparison.OrdinalIgnoreCase)))
+        {
+            return BadRequest("a sensor with this mac address is already registered");
+        }
+
         var sensor = new SensorRegistration
         {
-            MacAddress = request.MacAddress,
-            Location = request.Location,
+            MacAddress = mac,
+            Location = location,
             Category = request.Category
         };
 
