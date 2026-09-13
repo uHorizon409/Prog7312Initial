@@ -16,6 +16,7 @@ Data ingestion and validation gateway for the Smart-X IoT scenario. Built with .
 - Recursion: `SmartX.Shared/DeploymentNode.cs`, used when registering a sensor to check the location path (e.g. `Facility A > Zone 1 > Sub-Zone B`) is a valid nested config
 - File upload: `AttachmentsController` on the API, `OpenFileDialog` on the client
 - Dynamic engagement feature: anomaly highlighting, sensor rows in the dashboard change colour when a reading is out of range or a sensor stops reporting (matches the Task 1 research report)
+- Server side validation: `SensorsController` rejects a bad mac address format, an unknown category, and duplicate mac addresses, and returns the real reason so the client can show it
 
 ## Prerequisites
 
@@ -49,7 +50,7 @@ cd SmartX.Client
 dotnet run
 ```
 
-Make sure the API is already running first, the client points at `http://localhost:5154/` (see `ApiClient` in `MainForm.cs`).
+Make sure the API is already running first. The client reads the API address from `SmartX.Client/appsettings.json` (`ApiBaseUrl`), which defaults to `http://localhost:5154/`. Change that file if you run the API on a different port.
 
 ## Using the app
 
