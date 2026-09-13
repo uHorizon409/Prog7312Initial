@@ -37,6 +37,9 @@ public class DashboardForm : Form
         var refreshButton = new Button { Text = "Refresh", Location = new Point(180, 10), Width = 100 };
         refreshButton.Click += async (s, e) => await RefreshGridAsync();
 
+        var aggregateButton = new Button { Text = "Aggregate Power Load", Location = new Point(290, 10), Width = 160 };
+        aggregateButton.Click += async (s, e) => await ShowAggregatePowerLoadAsync();
+
         _healthScoreLabel = new Label
         {
             Text = "System Health: --",
@@ -66,8 +69,36 @@ public class DashboardForm : Form
 
         Controls.Add(registerButton);
         Controls.Add(refreshButton);
+        Controls.Add(aggregateButton);
         Controls.Add(_healthScoreLabel);
         Controls.Add(_grid);
+    }
+
+    // adds up every power consumption sensor's last reading using the
+    // SensorMeter + operator, same idea as Meter3 = Meter1 + Meter2 from the brief
+    private async Task ShowAggregatePowerLoadAsync()
+    {
+        var sensors = await _apiClient.GetSensorsAsync();
+        var powerSensors = sensors.Where(s => s.Category == SensorCategory.PowerConsumption).ToList();
+
+        if (powerSensors.Count == 0)
+        {
+            MessageBox.Show(this, "No power consumption sensors registered yet.", "Aggregate Power Load");
+            return;
+        }
+
+        SensorMeter total = new(powerSensors[0].MacAddress, powerSensors[0].LastReading);
+        for (int i = 1; i < powerSensors.Count; i++)
+        {
+            var nextMeter = new SensorMeter(powerSensors[i].MacAddress, powerSensors[i].LastReading);
+            total = total + nextMeter;
+        }
+
+        MessageBox.Show(
+            this,
+            $"Combined load across {powerSensors.Count} power sensors: {total.Reading:F1} W",
+            "Aggregate Power Load"
+        );
     }
 
     private async void RegisterButton_Click(object? sender, EventArgs e)
