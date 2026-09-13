@@ -22,12 +22,16 @@ public class SensorRegistrationForm : Form
         Text = "Register Sensor";
         Width = 420;
         Height = 320;
+        MinimumSize = new Size(380, 300);
         StartPosition = FormStartPosition.CenterParent;
-        FormBorderStyle = FormBorderStyle.FixedDialog;
-        MaximizeBox = false;
 
         var macLabel = new Label { Text = "Device MAC Address", Location = new Point(20, 20), AutoSize = true };
-        _macTextBox = new TextBox { Location = new Point(20, 45), Width = 360 };
+        _macTextBox = new TextBox
+        {
+            Location = new Point(20, 45),
+            Width = 360,
+            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+        };
 
         var locationLabel = new Label
         {
@@ -35,22 +39,40 @@ public class SensorRegistrationForm : Form
             Location = new Point(20, 80),
             AutoSize = true
         };
-        _locationTextBox = new TextBox { Location = new Point(20, 105), Width = 360 };
+        _locationTextBox = new TextBox
+        {
+            Location = new Point(20, 105),
+            Width = 360,
+            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
+        };
 
         var categoryLabel = new Label { Text = "Sensor Category", Location = new Point(20, 140), AutoSize = true };
         _categoryComboBox = new ComboBox
         {
             Location = new Point(20, 165),
             Width = 360,
-            DropDownStyle = ComboBoxStyle.DropDownList
+            DropDownStyle = ComboBoxStyle.DropDownList,
+            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
         };
         _categoryComboBox.Items.AddRange(Enum.GetNames(typeof(SensorCategory)));
         _categoryComboBox.SelectedIndex = 0;
 
-        var attachButton = new Button { Text = "Attach Config / Photo / Log", Location = new Point(20, 200), Width = 200 };
+        var attachButton = new Button
+        {
+            Text = "Attach Config / Photo / Log",
+            Location = new Point(20, 200),
+            Width = 200,
+            Anchor = AnchorStyles.Bottom | AnchorStyles.Left
+        };
         attachButton.Click += AttachButton_Click;
 
-        var registerButton = new Button { Text = "Register Sensor", Location = new Point(240, 200), Width = 140 };
+        var registerButton = new Button
+        {
+            Text = "Register Sensor",
+            Location = new Point(240, 200),
+            Width = 140,
+            Anchor = AnchorStyles.Bottom | AnchorStyles.Left
+        };
         registerButton.Click += RegisterButton_Click;
 
         _statusLabel = new Label
@@ -58,7 +80,8 @@ public class SensorRegistrationForm : Form
             Location = new Point(20, 240),
             Width = 360,
             Height = 40,
-            ForeColor = Color.DarkRed
+            ForeColor = Color.DarkRed,
+            Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
         };
 
         Controls.Add(macLabel);
