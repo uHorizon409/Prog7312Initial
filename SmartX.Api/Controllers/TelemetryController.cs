@@ -32,8 +32,18 @@ public class TelemetryController : ControllerBase
     [HttpPost]
     public IActionResult Ingest(TelemetryReadingRequest request)
     {
-        // wrap it in a TelemetryPacket first, this is the generic type doing
-        // its job even though the value here is always a double for now
+        if (string.IsNullOrWhiteSpace(request.SensorId))
+        {
+            return BadRequest("sensor id is required");
+        }
+
+        if (double.IsNaN(request.Value) || double.IsInfinity(request.Value))
+        {
+            return BadRequest("value must be a real number");
+        }
+
+        // wrap it in a TelemetryPacket, the client already sends a typed packet
+        // per category, this is the api side receiving the raw number for storage
         var packet = new TelemetryPacket<double>(request.SensorId, request.Value);
 
         bool updated = _sensorStore.UpdateReading(packet.SensorId, packet.Value);
