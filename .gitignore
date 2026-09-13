@@ -1,0 +1,7 @@
+bin/
+obj/
+.vs/
+*.user
+.vscode/
+SmartX.Api/wwwroot/uploads/*
+!SmartX.Api/wwwroot/uploads/.gitkeep
