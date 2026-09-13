@@ -39,7 +39,7 @@ public class MainForm : Form
 
         var commandButton = new Button
         {
-            Text = "Real-Time Command Stream and History (Part 2)",
+            Text = "Real-Time Command Stream and History (Coming Soon)",
             Location = new Point(20, 150),
             Width = 400,
             Height = 50,
@@ -49,7 +49,7 @@ public class MainForm : Form
 
         var meshButton = new Button
         {
-            Text = "Network Topology and Mesh Routing (Final PoE)",
+            Text = "Network Topology and Mesh Routing (Coming Soon)",
             Location = new Point(20, 220),
             Width = 400,
             Height = 50,
