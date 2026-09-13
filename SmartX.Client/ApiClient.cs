@@ -21,14 +21,24 @@ public class ApiClient
         public SensorCategory Category { get; set; }
     }
 
-    public async Task<SensorRegistration?> RegisterSensorAsync(RegisterSensorRequest request)
+    public class RegisterResult
+    {
+        public SensorRegistration? Sensor { get; set; }
+        public string? Error { get; set; }
+    }
+
+    public async Task<RegisterResult> RegisterSensorAsync(RegisterSensorRequest request)
     {
         var response = await _http.PostAsJsonAsync("api/sensors", request);
+
         if (!response.IsSuccessStatusCode)
         {
-            return null;
+            var error = await response.Content.ReadAsStringAsync();
+            return new RegisterResult { Error = string.IsNullOrWhiteSpace(error) ? "registration failed" : error };
         }
-        return await response.Content.ReadFromJsonAsync<SensorRegistration>();
+
+        var sensor = await response.Content.ReadFromJsonAsync<SensorRegistration>();
+        return new RegisterResult { Sensor = sensor };
     }
 
     public async Task<List<SensorRegistration>> GetSensorsAsync()
