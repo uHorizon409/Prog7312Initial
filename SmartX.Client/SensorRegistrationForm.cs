@@ -113,6 +113,9 @@ public class SensorRegistrationForm : Form
 
     private async void RegisterButton_Click(object? sender, EventArgs e)
     {
+        _macTextBox.Text = _macTextBox.Text.Trim();
+        _locationTextBox.Text = _locationTextBox.Text.Trim();
+
         if (string.IsNullOrWhiteSpace(_macTextBox.Text) || string.IsNullOrWhiteSpace(_locationTextBox.Text))
         {
             _statusLabel.ForeColor = Color.DarkRed;
@@ -137,17 +140,17 @@ public class SensorRegistrationForm : Form
             Category = Enum.Parse<SensorCategory>((string)_categoryComboBox.SelectedItem!)
         };
 
-        var sensor = await _apiClient.RegisterSensorAsync(request);
-        if (sensor == null)
+        var result = await _apiClient.RegisterSensorAsync(request);
+        if (result.Sensor == null)
         {
             _statusLabel.ForeColor = Color.DarkRed;
-            _statusLabel.Text = "Could not register sensor, check the api is running";
+            _statusLabel.Text = result.Error ?? "Could not register sensor, check the api is running";
             return;
         }
 
         if (_pendingAttachmentPath != null)
         {
-            await _apiClient.UploadAttachmentAsync(sensor.Id, _pendingAttachmentPath);
+            await _apiClient.UploadAttachmentAsync(result.Sensor.Id, _pendingAttachmentPath);
         }
 
         DialogResult = DialogResult.OK;
