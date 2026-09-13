@@ -13,6 +13,7 @@ public class DashboardForm : Form
     private readonly TelemetryHistoryStore _localHistory = new();
     private DataGridView _grid = null!;
     private Label _healthScoreLabel = null!;
+    private ListBox _packetLog = null!;
 
     public DashboardForm(ApiClient apiClient)
     {
@@ -52,7 +53,7 @@ public class DashboardForm : Form
         {
             Location = new Point(10, 50),
             Width = 870,
-            Height = 460,
+            Height = 330,
             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom,
             ReadOnly = true,
             AllowUserToAddRows = false,
@@ -67,11 +68,29 @@ public class DashboardForm : Form
         _grid.Columns.Add("Status", "Status");
         _grid.Columns["Id"]!.Visible = false;
 
+        var packetLogLabel = new Label
+        {
+            Text = "Recent Telemetry Packets (TelemetryPacket<T> per sensor type)",
+            Location = new Point(10, 390),
+            AutoSize = true,
+            Anchor = AnchorStyles.Bottom | AnchorStyles.Left
+        };
+
+        _packetLog = new ListBox
+        {
+            Location = new Point(10, 410),
+            Width = 870,
+            Height = 110,
+            Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
+        };
+
         Controls.Add(registerButton);
         Controls.Add(refreshButton);
         Controls.Add(aggregateButton);
         Controls.Add(_healthScoreLabel);
         Controls.Add(_grid);
+        Controls.Add(packetLogLabel);
+        Controls.Add(_packetLog);
     }
 
     // adds up every power consumption sensor's last reading using the
@@ -161,9 +180,30 @@ public class DashboardForm : Form
             // keep a local jagged history too, same idea as the api side
             // TelemetryHistoryStore, batch first then flatten into a List<T>
             _localHistory.AddBatch(sensor.Id, new[] { reading });
+
+            // build the actual typed packet for this category, float/int/bool
+            // all go through the same generic wrapper without getting boxed
+            _packetLog.Items.Insert(0, BuildTypedPacket(sensor, reading));
+            if (_packetLog.Items.Count > 30)
+            {
+                _packetLog.Items.RemoveAt(_packetLog.Items.Count - 1);
+            }
         }
 
         await RefreshGridAsync();
+    }
+
+    // environmental sensors report a float, power sensors report an int,
+    // actuators report a bool, TelemetryPacket<T> handles all three the same way
+    private static string BuildTypedPacket(SensorRegistration sensor, double rawValue)
+    {
+        return sensor.Category switch
+        {
+            SensorCategory.Environmental => new TelemetryPacket<float>(sensor.MacAddress, (float)rawValue).ToString(),
+            SensorCategory.PowerConsumption => new TelemetryPacket<int>(sensor.MacAddress, (int)rawValue).ToString(),
+            SensorCategory.Actuator => new TelemetryPacket<bool>(sensor.MacAddress, rawValue != 0).ToString(),
+            _ => new TelemetryPacket<double>(sensor.MacAddress, rawValue).ToString()
+        };
     }
 
     private double GenerateMockReading(SensorCategory category)
