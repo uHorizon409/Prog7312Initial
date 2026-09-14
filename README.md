@@ -23,6 +23,26 @@ Data ingestion and validation gateway for the Smart-X IoT scenario. Built with .
 - .NET 10 SDK
 - Windows, to actually run the client (the API can run anywhere, the client needs Windows Forms)
 
+## If Visual Studio refuses to build this (NETSDK1100 / "does not support targeting .NET 10.0")
+
+This is a known issue and does not mean the project is broken. Visual Studio's own IDE build tooling has a separate, older version check for which target frameworks it recognises, independent of which .NET SDKs are actually installed on the machine. Even with the .NET 10 SDK installed, pressing F5 in an older Visual Studio release can still fail with this exact error.
+
+**Fix: build and run from a terminal instead of using F5.** This uses the installed SDK directly and is not affected by the IDE-level check:
+
+```
+cd SmartX.Api
+dotnet run
+```
+
+and in a second terminal:
+
+```
+cd SmartX.Client
+dotnet run
+```
+
+Confirm the .NET 10 SDK is actually installed first with `dotnet --list-sdks` (should list a `10.x` entry). If it is not, install it from https://dotnet.microsoft.com/download/dotnet/10.0 first.
+
 ## Restoring and building
 
 From the solution root:
